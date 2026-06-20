@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corpo Lab — Fisioteràpia i benestar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+img { max-width: 100%; display: block; }
+button, input, textarea, select { font: inherit; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface-light: #242424;
+      --text: #f0eee9;
+      --text-muted: #9e9a94;
+      --negre-text: #2d2d2d;
+      --accent: #c4a87c;
+      --accent-dim: #a58b64;
+      --border: #2a2a2a;
+      --font-serif: 'Playfair Display', serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-weight: 300;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; /* Afegeix això */
+  -moz-osx-font-smoothing: grayscale; /* I això */
+}
+
+    /* ─── Scroll animation frames ─── */
+    #hero-frames {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      overflow: hidden;
+      background: #0f0f0f;
+    }
+    #hero-frames img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      will-change: opacity;
+    }
+    #hero-frames img.active {
+      opacity: 1;
+    }
+
+    #scroll-progress {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+    }
+
+    #scroll-progress .bar {
+      width: 120px; height: 1px;
+      background: var(--border);
+      position: relative;
+    }
+
+    #scroll-progress .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.15s ease-out;
+      width: 0%;
+    }
+
+    /* ─── Overlay gradient ─── */
+    .hero-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(180deg, rgba(15,15,15,0.15) 0%, rgba(15,15,15,0.55) 80%, rgba(15,15,15,0.85) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ─── Hero content ─── */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 24px;
+      pointer-events: none;
+    }
+
+    .hero-content .tagline {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(14px, 1.2vw, 20px);
+      color: var(--negre-text);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 1.2s 0.3s forwards;
+    }
+
+    .hero-content h1 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: clamp(48px, 8vw, 120px);
+      color: var(--text);
+      letter-spacing: 6px;
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: fadeUp 1.2s 0.5s forwards;
+    }
+
+
+
+    .hero-content .sub {
+      font-size: clamp(14px, 1.2vw, 18px);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #000000;
+      font-weight: 600;
+      opacity: 0;
+      animation: fadeUp 1.2s 0.7s forwards;
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 1.2s 1s forwards;
+      pointer-events: none;
+    }
+
+    .hero-scroll-hint span {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .hero-scroll-hint .mouse {
+      width: 20px; height: 30px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .hero-scroll-hint .mouse::after {
+      content: '';
+      position: absolute;
+      top: 6px; left: 50%;
+      transform: translateX(-50%);
+      width: 2px; height: 8px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: scrollPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+      100% { transform: translateX(-50%) translateY(12px); opacity: 0; }
+    }
+
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(24px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Content sections ─── */
+    .content {
+      position: relative;
+      z-index: 2;
+      margin-top: 100vh;
+    }
+
+    section {
+      padding: 120px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(15,15,15,0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    section:last-of-type {
+      border-bottom: none;
+    }
+
+    .spacer {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: transparent;
+      border: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 0 24px;
+    }
+    .spacer p {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(18px, 2vw, 28px);
+      color: rgba(240,238,233,0.25);
+      letter-spacing: 4px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: clamp(32px, 4vw, 52px);
+      margin-bottom: 32px;
+      line-height: 1.2;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .section-body {
+      max-width: 720px;
+      font-size: clamp(15px, 1.1vw, 18px);
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .section-body strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .section-body p + p {
+      margin-top: 20px;
+    }
+
+    /* ─── Serveis grid ─── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      margin-top: 48px;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 40px 32px;
+      transition: border-color 0.4s, transform 0.4s;
+    }
+
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .service-card .num {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .service-card h3 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .service-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+	.full-width-image {
+    display: flex;
+    justify-content: center; /* Centra horitzontalment */
+    margin-top: 40px;        /* Espai respecte els quadres de dalt */
+    width: 100%;
+}
+
+.full-width-image img {
+    max-width: 800px;        /* Ajusta l'amplada màxima al teu gust */
+    width: 100%;             /* Fa que s'adapti si la pantalla és petita */
+    height: auto;            /* Manté la proporció de la foto */
+    border-radius: 8px;      /* Opcional: li dóna un toc més elegant */
+}
+
+    /* ─── Cita / Contact ─── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-top: 48px;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    .contact-info h4 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .contact-info p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .contact-info .detail {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .contact-info .detail-icon {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 36px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ─── Form ─── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group select {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e9a94' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      position: relative;
+      z-index: 2;
+      background: rgba(15,15,15,0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 60px 24px 32px;
+      text-align: center;
+    }
+
+    footer .logo {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      letter-spacing: 4px;
+      color: var(--negre-text;)
+      margin-bottom: 4px;
+    }
+
+  footer .tagline {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--negre-text;) 
+    margin-bottom: 32px;
+}
+
+    footer .links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    footer .links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      transition: color 0.3s;
+    }
+
+    footer .links a:hover {
+      color: var(--accent);
+    }
+
+    footer .copy {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* ─── Gimnàs ─── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .gallery-grid .img-placeholder {
+      aspect-ratio: 4 / 3;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-grid .img-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-grid .img-placeholder.wide {
+      grid-column: span 2;
+      aspect-ratio: 16 / 7;
+    }
+    @media (max-width: 640px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-grid .img-placeholder.wide { grid-column: span 1; }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 480px) {
+      section { padding: 80px 20px; }
+      .hero-content h1 { letter-spacing: 3px; }
+      #scroll-progress { display: none; }
+    }
+
+    /* ─── Fade-in on scroll ─── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      mix-blend-mode: difference;
+      pointer-events: none;
+    }
+
+    nav a {
+      pointer-events: auto;
+    }
+
+    nav .logo-small {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      letter-spacing: 3px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    nav .nav-links a {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    nav .nav-links a:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      nav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="logo-small">Corpo Lab</a>
+    <ul class="nav-links">
+      <li><a href="#Principis">Principis</a></li>
+      <li><a href="#Laboratori">Laboratori</a></li>
+      <li><a href="#gimnas">Gimnàs</a></li>
+      <li><a href="#cita">Cita</a></li>
+      <li><a href="#contacte">Contacte</a></li>
+    </ul>
+  </nav>
+
+  <!-- Frames for scroll animation -->
+  <div id="hero-frames"></div>
+  <div class="hero-overlay"></div>
+
+
+<div class="hero-content">
+  <p class="tagline">ex radicibus crescit</p>
+  <h1>CORPO lab</h1>
+  <p class="sub">Fisioteràpia &middot; Rehabilitació </p>
+</div>
+
+
+  <div class="hero-scroll-hint">
+    <div class="mouse"></div>
+    <span>Desplaçeu-vos</span>
+  </div>
+
+  <div id="scroll-progress">
+    <span>00</span>
+    <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+    <span id="total-frames">37</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Sobre nosaltres -->
+    <section id="Principis">
+      <p class="section-label fade-in">Principis</p>
+      <h2 class="section-title fade-in">Ex <em>Radicibus </em> Crescit</h2>
+      <div class="section-body fade-in">
+        <p>
+          I la seva traducció: <strong>Renèixer des de l'arrel</strong> . L'objectiu és buscar el problema arrel,
+          per poder sanar des de l'inici. Entenem la recuperació no com un destí, sinó com un retorn a l'origen. Com l'arbre que, amb les arrels deteriorades,
+ 	  no pot sostenir la seva esplendor ni complir el seu cicle, el cos no pot sanar si només atén el que és superficial.
+          Al nostre laboratori, cada teixit, cada articulació,
+          cada fibra muscular forma part d'un continuum per sostindre el que sou: moviment, presència, vida.
+        </p>
+        <p>
+	<h2 class="section-title fade-in"> <em>Motus </em> est<em> Medicina</em></h2>
+        <div class="section-body fade-in">
+        <p>
+	<strong>Hipócrates</strong>. Trencar el cicle del dolor comença amb el moviment. Nosaltres et donem les 
+	facilitats i el suport que necessites per tornar a sentir-te tu mateix.
+	</p>
+        <p>
+         <h2 class="section-title fade-in"> <em>Mens </em> Sana <em>Corpore </em> Sano</h2>
+      <div class="section-body fade-in">
+        <p>
+        <strong>D.I. Iuvenalis</strong>. Cuidar el cos és la via més directa per trobar l'equilibri mental. La recuperació d'una lesió és un camí cap a l'autonomia;
+	i és que, quan recuperes la capacitat de moure't amb llibertat, la pau mental es converteix en la teva millor aliada.
+        </p>
+      </div>
+    </section>
+
+    <section id="Laboratori">
+      <p class="section-label fade-in">Laboratori</p>
+      <h2 class="section-title fade-in">Tractaments <em>personalitzats</em>.</h2>
+      <div class="section-body fade-in" style="margin-bottom:40px;">
+        <p>Cada cos és únic, igual que les seves necessitats. Per això dissenyem un esquema de treball, adaptant les diferents etapes a cada cas.</p>
+      </div>
+
+      <div class="services-grid" style="margin-bottom: 40px;">
+        <div class="service-card fade-in">
+          <p class="num">01</p>
+          <h3>Estudi del momentum</h3>
+          <p>La visió global, la detecció d'interaccions complexes entre les diferents zones corporals.</p>
+        </div>
+        <div class="service-card fade-in">
+          <p class="num">02</p>
+          <h3>Simptomatologia</h3>
+          <p>Relacionar els símptomes amb el coneixement previ del cos. Es relacionen?</p>
+        </div>
+        <div class="service-card fade-in">
+          <p class="num">03</p>
+          <h3>Disseny de tractament</h3>
+          <p>En conjunt. Planifiquem les metes i els tempos del tractament per arribar on vols.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; width: 100%;">
+        <img src="img/3.jpg" alt="Consulta" style="max-width: 800px; width: 90%; border-radius: 8px;">
+      </div>
+    </section>
+
+    <!-- Gimnàs de rehabilitació -->
+    <section id="gimnas">
+      <p class="section-label fade-in">Gimnàs de rehabilitació</p>
+      <h2 class="section-title fade-in">L'espai on el cos es <em>recupera</em>.</h2>
+      <div class="section-body fade-in">
+        <p>Disposem d'un gimnàs terapèutic equipat per a la rehabilitació funcional. Un espai ampli pensat perquè cada pacient pugui realitzar 
+	el tractament acordat en un entorn segur i professional.</p>
+      </div>
+      <div class="gallery-grid">
+  <!-- Si la foto està a la carpeta img: -->
+  <div class="img-placeholder">
+    <img src="img/1.jpg" alt="Espai de rehabilitació">
+  </div>
+  <div class="img-placeholder">
+    <img src="img/2.jpg" alt="Espai de rehabilitació">
+  </div>
+
+</div>
+
+
+	<h2 class="section-title fade-in">Una sala d'accés <em> autònom </em> i <em> controlat</em>.</h2>
+      <div class="section-body fade-in">
+        <p>L’accés s’obté mitjançant un codi facilitat durant les sessions privades de fisioteràpia. 
+	Es tracta d'un espai compartit amb altres persones que, com tu, volen impulsar la seva salut. 
+	La sala està totalment equipada per dur a terme els exercicis pautats, facilitant així l'adhesió al teu pla terapèutic.
+	L'horari d'obertura de la sala es de 06:00 - 22:00. </p>
+      </div>
+
+    </section>
+
+    <!-- Demanar cita -->
+<section id="cita">
+  <p class="section-label fade-in">Cita prèvia</p>
+  <h2 class="section-title fade-in">Doneu el primer <em>pas</em>.</h2>
+  <div class="section-body fade-in">
+    <p>Ompliu el formulari i us respondrem en menys de 24 hores per concertar una visita sense compromís.</p>
+  </div>
+  <div class="contact-grid">
+    <!-- Formulari connectat a Formspree -->
+    <form action="https://formspree.io/f/mwvjgzdg" method="POST" class="fade-in">
+      
+      <div class="form-group">
+        <label for="nom">Nom complet</label>
+        <input type="text" id="nom" name="nom" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Correu electrònic</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="telefon">Telèfon</label>
+        <input type="tel" id="telefon" name="telefon">
+      </div>
+      
+      <div class="form-group">
+        <label for="servei">Servei d'interès</label>
+        <select id="servei" name="servei" required>
+          <option value="">Seleccioneu una opció</option>
+          <option value="diagnostic">Tinc un diagnòstic i vull recuperar-me</option>
+          <option value="sense-diagnostic">Tinc una dolència sense diagnòstic</option>
+          <option value="prevencio">Vull fer prevenció de lesions</option>
+          <option value="entrenador">Estic interessat en un entrenador personal (pròximament)</option>
+          <option value="altres">Cap de les anteriors</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="missatge">Nom del diagnòstic o motiu de consulta (opcional)</label>
+        <textarea id="missatge" name="missatge" placeholder="Exemples: Epicondilitis / mal d'esquena"></textarea>
+      </div>
+      
+      <button type="submit" class="btn btn-block">Enviar sol·licitud</button>
+    </form>
+
+    <div class="contact-info fade-in">
+      <h4>També ens podeu trobar a</h4>
+      <p>Preferiu el telèfon o el correu? Estarem encantats d'atendre-us.</p>
+      <div class="detail">
+        <div class="detail-icon">&#9742;</div>
+        <span>+34 688 913 918 </span>
+      </div>
+      <div class="detail">
+        <div class="detail-icon">&#9993;</div>
+        <span>corpolabb@gmail.com</span>
+      </div>
+      <div class="detail">
+        <div class="detail-icon">&#9906;</div>
+        <span>C. Santa Joaquima de Vedruna, 4 · 25230 Mollerussa</span>
+      </div>
+      <div style="margin-top: 24px;">
+        <a href="https://wa.me/34688913918" class="btn" target="_blank">Escriu-nos per WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Spacer — el logo es veu en tota la seua esplendor -->
+    <section class="spacer">
+      <p>ex radicibus crescit</p>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p class="logo">Corpo Lab</p>
+    <p class="tagline">ex radicibus crescit</p>
+    <div class="links">
+      <a href="#Principis">El Laboratori del Cos</a>
+      <a href="#Laboratori">Laboratori</a>
+      <a href="#cita">Demanar cita</a>
+      <a href="#contacte">Contacte</a>
+      <a href="#">Avís legal</a>
+    </div>
+    <p class="copy">&copy; 2026 Corpo Lab · Tots els drets reservats</p>
+  </footer>
+
+  <script>
+    (function() {
+      const totalFrames = 37;
+      const container = document.getElementById('hero-frames');
+
+      // Inject img tags into DOM
+      for (let i = 1; i <= totalFrames; i++) {
+        const img = document.createElement('img');
+        const num = String(i).padStart(3, '0');
+        img.src = 'ezgif-frame-' + num + '.jpg';
+        img.alt = '';
+        if (i === 1) img.classList.add('active');
+        container.appendChild(img);
+      }
+
+      const frames = container.querySelectorAll('img');
+      const barFill = document.getElementById('bar-fill');
+      const progressLabel = document.querySelector('#scroll-progress span:first-child');
+      let current = 0;
+
+      function updateFromScroll() {
+        const scrollY = window.scrollY;
+        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const progress = Math.min(1, scrollY / maxScroll);
+
+        const index = Math.round(progress * (totalFrames - 1));
+        const clamped = Math.min(totalFrames - 1, Math.max(0, index));
+
+        if (clamped === current) return;
+        current = clamped;
+
+        frames.forEach((img, i) => {
+          img.classList.toggle('active', i === current);
+        });
+
+        barFill.style.width = Math.round(progress * 100) + '%';
+        progressLabel.textContent = String(current + 1).padStart(2, '0');
+      }
+
+      window.addEventListener('scroll', updateFromScroll, { passive: true });
+      updateFromScroll();
+
+      // ─── Set total label ───
+      document.getElementById('total-frames').textContent = String(totalFrames);
+
+      // ─── Fade-in observer ───
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    })();
+  </script>
+</body>
+</html>
